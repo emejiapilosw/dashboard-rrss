@@ -1,51 +1,92 @@
 import streamlit as st
-import plotly.express as px
-from auth import login, logout
-from data_processing import load_excel
-from analytics import calculate_kpis, by_platform
+import pandas as pd
+
+from core.auth import login
+from data.loader import load_excel
+from analytics.engine import compute_all
+from ui.theme import apply_theme
+from ui.kpi_cards import render_kpis
+from ui.render_group_tab import render_group_tab
+
+# ==========================
+# CONFIG
+# ==========================
 
 st.set_page_config(
     page_title="Dashboard RRSS",
-    page_icon="📊",
-    layout="wide"
+    layout="wide",
+    page_icon="📊"
 )
+
+apply_theme()
+
+# ==========================
+# LOGIN
+# ==========================
 
 if not login():
     st.stop()
 
-with st.sidebar:
-    st.success(f"Usuario: {st.session_state.username}")
-    if st.button("Cerrar sesión"):
-        logout()
+# ==========================
+# SIDEBAR
+# ==========================
 
-    uploaded_file = st.file_uploader("Sube archivo Excel", type=["xlsx"])
+st.sidebar.title("📂 Cargar archivo")
+
+uploaded_file = st.sidebar.file_uploader(
+    "Sube el Excel",
+    type=["xlsx"]
+)
 
 if uploaded_file is None:
-    st.info("Sube un archivo para comenzar.")
     st.stop()
 
 df = load_excel(uploaded_file)
 
-kpis = calculate_kpis(df)
+# ==========================
+# MOTOR ANALÍTICO
+# ==========================
 
-st.title("📊 Dashboard Redes Sociales")
+results = compute_all(df)
 
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Posts", kpis["posts"])
-col2.metric("Impressions", f"{kpis['impressions']:,}")
-col3.metric("Views", f"{kpis['views']:,}")
-col4.metric("Interacciones", f"{kpis['interactions']:,}")
+# ==========================
+# HEADER
+# ==========================
+
+st.markdown('<div class="big-title">Dashboard Redes Sociales</div>', unsafe_allow_html=True)
+st.write(" ")
+
+render_kpis(results["kpis"])
 
 st.divider()
 
-platform_data = by_platform(df)
+# ==========================
+# TABS
+# ==========================
 
-if platform_data is not None:
-    fig = px.bar(
-        platform_data,
-        x="Platform",
-        y="Interacciones",
-        color="Platform",
-        title="Interacciones por Plataforma"
-    )
-    st.plotly_chart(fig, use_container_width=True)
+tabs = st.tabs([
+    "📈 Plataforma",
+    "🎭 Género",
+    "📦 Formato",
+    "🧩 Content Format",
+    "🗂 Content Group",
+    "🏷 Título"
+])
+
+with tabs[0]:
+    render_group_tab(results, "platform", "Platform")
+
+with tabs[1]:
+    render_group_tab(results, "genre", "Género")
+
+with tabs[2]:
+    render_group_tab(results, "format", "Formato")
+
+with tabs[3]:
+    render_group_tab(results, "content_format", "PV_Content Format")
+
+with tabs[4]:
+    render_group_tab(results, "content_group", "PV_Content Format Group")
+
+with tabs[5]:
+    render_group_tab(results, "title", "Título")
