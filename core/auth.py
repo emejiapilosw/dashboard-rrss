@@ -20,41 +20,55 @@ def login():
 
     st.markdown("""
     <style>
-    .login-container {
-        background: rgba(15, 23, 42, 0.85);
-        padding: 40px;
-        border-radius: 16px;
-        border: 1px solid #1e293b;
-        max-width: 400px;
-        margin: auto;
-        margin-top: 100px;
+
+    .login-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
     }
+
+    .login-card {
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(20px);
+        padding: 50px;
+        border-radius: 20px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        width: 420px;
+        box-shadow: 0 0 40px rgba(56, 189, 248, 0.1);
+    }
+
+    .login-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #38bdf8;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    div.stButton > button {
+        background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+        color: white;
+        font-weight: 600;
+        border-radius: 12px;
+        height: 48px;
+        border: none;
+    }
+
+    div.stButton > button:hover {
+        background: linear-gradient(90deg, #0ea5e9, #0284c7);
+        color: white;
+    }
+
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="login-container">', unsafe_allow_html=True)
-
-    st.title("🔐 Login")
+    st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+    st.markdown('<div class="login-title">🔐 Acceso Seguro</div>', unsafe_allow_html=True)
 
     username = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
-
-    # Botón con contraste real
-    st.markdown("""
-    <style>
-    div.stButton > button:first-child {
-        background-color: #38bdf8;
-        color: #0b1220;
-        font-weight: 600;
-        border-radius: 8px;
-        height: 42px;
-    }
-    div.stButton > button:first-child:hover {
-        background-color: #0ea5e9;
-        color: white;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
     if st.button("Ingresar", use_container_width=True):
         if check_password(username, password):
@@ -63,6 +77,7 @@ def login():
         else:
             st.error("Credenciales incorrectas")
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     return False
