@@ -52,7 +52,7 @@ def render_group_tab(results, key, group_col):
     df_exec = df.head(top_n).copy()
 
     # =====================
-    # Gráfico moderno tech
+    # Gráfico DARK real
     # =====================
 
     if "Interacciones" in df_exec.columns:
@@ -62,19 +62,32 @@ def render_group_tab(results, key, group_col):
             x="Interacciones",
             y=group_col,
             orientation="h",
-            text="Interacciones",
-            template="plotly_dark"
+            text="Interacciones"
         )
 
         fig.update_layout(
             height=450,
-            yaxis=dict(categoryorder="total ascending"),
-            xaxis_title="Interacciones",
-            yaxis_title="",
+            paper_bgcolor="#0b1220",
+            plot_bgcolor="#0b1220",
+            font=dict(color="#f8fafc"),
+            yaxis=dict(
+                categoryorder="total ascending",
+                showgrid=False
+            ),
+            xaxis=dict(
+                showgrid=True,
+                gridcolor="#1f2937"
+            ),
             margin=dict(l=20, r=20, t=30, b=20)
         )
 
+        # Colores dinámicos (Top 1 destacado)
+        colors = ["#38bdf8"] * len(df_exec)
+        if len(colors) > 0:
+            colors[0] = "#22c55e"
+
         fig.update_traces(
+            marker_color=colors,
             texttemplate="%{text:,.0f}",
             textposition="outside"
         )
