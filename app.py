@@ -1,118 +1,91 @@
 import streamlit as st
+import pandas as pd
 
-# ===============================
-# CONFIGURACIÓN
-# ===============================
+from analytics.engine import compute_all
+from ui.kpi_cards import render_kpis
+from auth import login
+
+
+# ======================
+# Configuración base
+# ======================
 
 st.set_page_config(
     page_title="Dashboard RRSS",
     page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    layout="wide"
 )
 
-# ===============================
-# IMPORTS INTERNOS
-# ===============================
-
-from ui.theme import apply_theme
-from core.auth import login
-from analytics.engine import compute_all
-from ui.kpi_cards import render_kpis
-from ui.render_group_tab import render_group_tab
-
-import pandas as pd
-
-
-# ===============================
-# THEME
-# ===============================
-
-apply_theme()
-
-
-# ===============================
-# LOGIN
-# ===============================
+# ======================
+# Login
+# ======================
 
 if not login():
     st.stop()
 
+# ======================
+# Título
+# ======================
 
-# ===============================
-# HEADER
-# ===============================
+st.title("📊 Dashboard Redes Sociales")
 
-st.title("Dashboard Redes Sociales")
-st.markdown("Análisis avanzado de desempeño digital")
-
-
-# ===============================
-# FILE UPLOADER
-# ===============================
+# ======================
+# Carga de archivo
+# ======================
 
 uploaded_file = st.file_uploader(
-    "📂 Cargar archivo Excel",
-    type=["xlsx"],
-    help="Sube el archivo con los datos de redes sociales"
+    "Sube tu archivo Excel",
+    type=["xlsx"]
 )
 
 if uploaded_file is None:
-    st.info("⬆ Sube un archivo Excel para comenzar el análisis.")
+    st.info("Carga un archivo para comenzar el análisis.")
     st.stop()
 
+# ======================
+# Lectura Excel
+# ======================
 
-# ===============================
-# PROCESAMIENTO (CACHE)
-# ===============================
+try:
+    df = pd.read_excel(uploaded_file)
+except Exception as e:
+    st.error("Error leyendo el archivo Excel.")
+    st.stop()
 
-@st.cache_data(show_spinner=True)
-def process_file(file):
-    df = pd.read_excel(file)
-    return compute_all(df)
+# ======================
+# Validación mínima de columnas
+# ======================
 
+required_cols = [
+    "Impressions",
+    "Reach",
+    "Views",
+    "Interacciones",
+    "E.R.",
+    "Platform"
+]
 
-results = process_file(uploaded_file)
+missing = [c for c in required_cols if c not in df.columns]
 
+if missing:
+    st.error(f"Faltan columnas obligatorias: {missing}")
+    st.stop()
 
-# ===============================
-# KPI
-# ===============================
+# ======================
+# Cálculo
+# ======================
+
+results = compute_all(df)
+
+# ======================
+# Render KPIs
+# ======================
 
 render_kpis(results)
 
+# ======================
+# Preview opcional
+# ======================
 
-# ===============================
-# TABS
-# ===============================
-
-tabs = st.tabs([
-    "📱 Plataforma",
-    "🎭 Género",
-    "📦 Formato",
-    "🧩 Content Format",
-    "🗂 Content Group",
-    "📝 Título",
-    "📊 Ejecutivo"
-])
-
-with tabs[0]:
-    render_group_tab(results, "platform", "Platform")
-
-with tabs[1]:
-    render_group_tab(results, "genre", "Género")
-
-with tabs[2]:
-    render_group_tab(results, "format", "Formato")
-
-with tabs[3]:
-    render_group_tab(results, "content_format", "Content Format")
-
-with tabs[4]:
-    render_group_tab(results, "content_group", "Content Group")
-
-with tabs[5]:
-    render_group_tab(results, "title", "Título")
-
-with tabs[6]:
-    render_group_tab(results, "platform", "Resumen Ejecutivo")
+with st.expander("Ver datos cargados"):
+    st.dataframe(df.head())
