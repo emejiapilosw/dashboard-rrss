@@ -1,76 +1,77 @@
 import streamlit as st
-import pandas as pd
 
-from core.auth import login
-from data.loader import load_excel
-from analytics.engine import compute_all
-from ui.theme import apply_theme
-from ui.kpi_cards import render_kpis
-from ui.render_group_tab import render_group_tab
-
-# ==========================
-# CONFIG
-# ==========================
+# ===============================
+# CONFIGURACIÓN INICIAL
+# ===============================
 
 st.set_page_config(
     page_title="Dashboard RRSS",
+    page_icon="📊",
     layout="wide",
-    page_icon="📊"
+    initial_sidebar_state="collapsed"
 )
+
+# ===============================
+# IMPORTS INTERNOS
+# ===============================
+
+from ui.theme import apply_theme
+from core.auth import login
+from data.loader import load_excel
+from analytics_engine import compute_all
+from ui.kpi_cards import render_kpis
+from ui.render_group_tab import render_group_tab
+
+
+# ===============================
+# APLICAR THEME GLOBAL
+# ===============================
 
 apply_theme()
 
-# ==========================
-# LOGIN
-# ==========================
+
+# ===============================
+# AUTENTICACIÓN
+# ===============================
 
 if not login():
     st.stop()
 
-# ==========================
-# SIDEBAR
-# ==========================
 
-st.sidebar.title("📂 Cargar archivo")
+# ===============================
+# CARGA Y PROCESAMIENTO DE DATA
+# ===============================
 
-uploaded_file = st.sidebar.file_uploader(
-    "Sube el Excel",
-    type=["xlsx"]
-)
+@st.cache_data(show_spinner=False)
+def get_processed_data():
+    df = load_excel("data.xlsx")
+    return compute_all(df)
 
-if uploaded_file is None:
-    st.stop()
+results = get_processed_data()
 
-df = load_excel(uploaded_file)
 
-# ==========================
-# MOTOR ANALÍTICO
-# ==========================
-
-results = compute_all(df)
-
-# ==========================
+# ===============================
 # HEADER
-# ==========================
+# ===============================
 
-st.markdown('<div class="big-title">Dashboard Redes Sociales</div>', unsafe_allow_html=True)
-st.write(" ")
+st.title("Dashboard Redes Sociales")
+st.markdown("Análisis avanzado de desempeño digital")
 
-render_kpis(results["kpis"])
+render_kpis(results)
 
-st.divider()
 
-# ==========================
-# TABS
-# ==========================
+# ===============================
+# TABS PRINCIPALES
+# ===============================
 
 tabs = st.tabs([
-    "📈 Plataforma",
+    "📱 Plataforma",
     "🎭 Género",
     "📦 Formato",
     "🧩 Content Format",
     "🗂 Content Group",
-    "🏷 Título"
+    "📝 Título",
+    "📊 Ejecutivo"
 ])
 
 with tabs[0]:
@@ -83,10 +84,13 @@ with tabs[2]:
     render_group_tab(results, "format", "Formato")
 
 with tabs[3]:
-    render_group_tab(results, "content_format", "PV_Content Format")
+    render_group_tab(results, "content_format", "Content Format")
 
 with tabs[4]:
-    render_group_tab(results, "content_group", "PV_Content Format Group")
+    render_group_tab(results, "content_group", "Content Group")
 
 with tabs[5]:
     render_group_tab(results, "title", "Título")
+
+with tabs[6]:
+    render_group_tab(results, "platform", "Resumen Ejecutivo")
