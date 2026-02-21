@@ -1,7 +1,7 @@
 import streamlit as st
 
 # ===============================
-# CONFIGURACIÓN INICIAL
+# CONFIGURACIÓN
 # ===============================
 
 st.set_page_config(
@@ -17,37 +17,26 @@ st.set_page_config(
 
 from ui.theme import apply_theme
 from core.auth import login
-from data.loader import load_excel
 from analytics.engine import compute_all
 from ui.kpi_cards import render_kpis
 from ui.render_group_tab import render_group_tab
 
+import pandas as pd
+
 
 # ===============================
-# APLICAR THEME GLOBAL
+# THEME
 # ===============================
 
 apply_theme()
 
 
 # ===============================
-# AUTENTICACIÓN
+# LOGIN
 # ===============================
 
 if not login():
     st.stop()
-
-
-# ===============================
-# CARGA Y PROCESAMIENTO DE DATA
-# ===============================
-
-@st.cache_data(show_spinner=False)
-def get_processed_data():
-    df = load_excel("data.xlsx")
-    return compute_all(df)
-
-results = get_processed_data()
 
 
 # ===============================
@@ -57,11 +46,44 @@ results = get_processed_data()
 st.title("Dashboard Redes Sociales")
 st.markdown("Análisis avanzado de desempeño digital")
 
+
+# ===============================
+# FILE UPLOADER
+# ===============================
+
+uploaded_file = st.file_uploader(
+    "📂 Cargar archivo Excel",
+    type=["xlsx"],
+    help="Sube el archivo con los datos de redes sociales"
+)
+
+if uploaded_file is None:
+    st.info("⬆ Sube un archivo Excel para comenzar el análisis.")
+    st.stop()
+
+
+# ===============================
+# PROCESAMIENTO (CACHE)
+# ===============================
+
+@st.cache_data(show_spinner=True)
+def process_file(file):
+    df = pd.read_excel(file)
+    return compute_all(df)
+
+
+results = process_file(uploaded_file)
+
+
+# ===============================
+# KPI
+# ===============================
+
 render_kpis(results)
 
 
 # ===============================
-# TABS PRINCIPALES
+# TABS
 # ===============================
 
 tabs = st.tabs([
@@ -94,4 +116,3 @@ with tabs[5]:
 
 with tabs[6]:
     render_group_tab(results, "platform", "Resumen Ejecutivo")
-
