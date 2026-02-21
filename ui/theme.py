@@ -1,62 +1,69 @@
 import streamlit as st
 
+PRIMARY = "#38bdf8"
+PRIMARY_HOVER = "#0ea5e9"
+BACKGROUND_TOP = "#0b1220"
+BACKGROUND_BOTTOM = "#0f172a"
+CARD_BG = "rgba(15, 23, 42, 0.85)"
+BORDER = "#1e293b"
+TEXT_MAIN = "#f8fafc"
+TEXT_SECONDARY = "#94a3b8"
+
 def apply_theme():
-    st.markdown("""
-        <style>
 
-        /* Fondo general */
-        .stApp {
-            background-color: #0b1220;
-        }
+    st.markdown(f"""
+    <style>
 
-        /* Texto general */
-        html, body, [class*="css"]  {
-            color: #f8fafc !important;
-        }
+    /* ===== APP BACKGROUND ===== */
+    [data-testid="stAppViewContainer"] {{
+        background: linear-gradient(180deg, {BACKGROUND_TOP} 0%, {BACKGROUND_BOTTOM} 100%);
+        color: {TEXT_MAIN};
+    }}
 
-        /* Títulos */
-        h1, h2, h3, h4 {
-            color: #38bdf8 !important;
-        }
+    /* ===== HEADINGS ===== */
+    h1, h2, h3 {{
+        color: {PRIMARY} !important;
+    }}
 
-        /* Labels */
-        label {
-            color: #e2e8f0 !important;
-            font-weight: 500;
-        }
+    /* ===== KPI CARDS ===== */
+    [data-testid="metric-container"] {{
+        background-color: {CARD_BG};
+        border: 1px solid {BORDER};
+        padding: 15px;
+        border-radius: 12px;
+    }}
 
-        /* MÉTRICAS */
-        div[data-testid="metric-container"] {
-            background: #111827;
-            border: 1px solid #1f2937;
-            padding: 20px;
-            border-radius: 14px;
-        }
+    [data-testid="metric-container"] label {{
+        color: {TEXT_SECONDARY} !important;
+    }}
 
-        div[data-testid="metric-container"] label {
-            color: #94a3b8 !important;
-            font-size: 14px !important;
-        }
+    [data-testid="metric-container"] div {{
+        color: {TEXT_MAIN} !important;
+        font-weight: 600;
+    }}
 
-        div[data-testid="metric-container"] div {
-            color: #ffffff !important;
-            font-size: 28px !important;
-            font-weight: 600 !important;
-        }
+    /* ===== TABS ===== */
+    button[data-baseweb="tab"] {{
+        color: {TEXT_SECONDARY} !important;
+    }}
 
-        /* Tabs */
-        button[role="tab"] {
-            color: #cbd5e1 !important;
-        }
+    button[data-baseweb="tab"][aria-selected="true"] {{
+        color: {PRIMARY} !important;
+    }}
 
-        button[aria-selected="true"] {
-            color: #38bdf8 !important;
-        }
+    /* ===== BUTTONS ===== */
+    .stButton>button {{
+        background-color: {PRIMARY};
+        color: {BACKGROUND_TOP};
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+    }}
 
-        /* Slider labels */
-        .stSlider label {
-            color: #e2e8f0 !important;
-        }
+    .stButton>button:hover {{
+        background-color: {PRIMARY_HOVER};
+        color: white;
+    }}
 
-        </style>
+    </style>
     """, unsafe_allow_html=True)
