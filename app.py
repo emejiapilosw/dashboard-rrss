@@ -18,7 +18,7 @@ st.set_page_config(
 from ui.theme import apply_theme
 from core.auth import login
 from data.loader import load_excel
-from analytics_engine import compute_all
+from analytics.engine import compute_all
 from ui.kpi_cards import render_kpis
 from ui.render_group_tab import render_group_tab
 
@@ -94,3 +94,4 @@ with tabs[5]:
 
 with tabs[6]:
     render_group_tab(results, "platform", "Resumen Ejecutivo")
+
