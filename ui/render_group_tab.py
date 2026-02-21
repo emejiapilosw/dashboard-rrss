@@ -5,6 +5,10 @@ from ui.table_style import style_table
 
 def render_group_tab(results, key, group_col):
 
+    if key not in results:
+        st.warning("No hay datos disponibles para este análisis.")
+        return
+
     df = results[key].copy()
 
     if df.empty:
@@ -45,35 +49,40 @@ def render_group_tab(results, key, group_col):
             key=f"top_{key}"
         )
 
-    df_exec = df.head(top_n)
+    df_exec = df.head(top_n).copy()
 
     # =====================
     # Gráfico moderno tech
     # =====================
 
-    fig = px.bar(
-        df_exec,
-        x="Interacciones",
-        y=group_col,
-        orientation="h",
-        text="Interacciones",
-        template="plotly_dark"
-    )
+    if "Interacciones" in df_exec.columns:
 
-    fig.update_layout(
-        height=450,
-        yaxis=dict(categoryorder="total ascending"),
-        xaxis_title="Interacciones",
-        yaxis_title="",
-        margin=dict(l=20, r=20, t=30, b=20)
-    )
+        fig = px.bar(
+            df_exec,
+            x="Interacciones",
+            y=group_col,
+            orientation="h",
+            text="Interacciones",
+            template="plotly_dark"
+        )
 
-    fig.update_traces(
-        texttemplate="%{text:,.0f}",
-        textposition="outside"
-    )
+        fig.update_layout(
+            height=450,
+            yaxis=dict(categoryorder="total ascending"),
+            xaxis_title="Interacciones",
+            yaxis_title="",
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
 
-    st.plotly_chart(fig, use_container_width=True)
+        fig.update_traces(
+            texttemplate="%{text:,.0f}",
+            textposition="outside"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    else:
+        st.warning("No existe la columna 'Interacciones' para graficar.")
 
     st.divider()
 
@@ -92,12 +101,19 @@ def render_group_tab(results, key, group_col):
 
         available_cols = [c for c in cols_exec if c in df_exec.columns]
 
+        if not available_cols:
+            st.warning("No hay columnas disponibles para mostrar.")
+            return
+
+        df_to_show = df_exec[available_cols].copy()
+
         st.dataframe(
-            style_table(df_exec[available_cols]),
+            style_table(df_to_show),
             use_container_width=True
         )
 
     else:
+
         st.dataframe(
             style_table(df),
             use_container_width=True
